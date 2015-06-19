@@ -1,9 +1,14 @@
 #! /usr/local/bin/guile -s 
-
-;what about if they don't have it here? alternatives: write a new script with guile 1 script. ask for guile dir as an arg to current script
-; or call guile -- to get (command-line) or something?
 !#
 (use-modules (sxml simple))
 
 (load (cadr (command-line)))
-(let ((p (open-output-file "xml_final.xml"))) (sxml->xml sxml_final p) (close-output-port p))
+(let ((p (open-output-file "xml_final.xml"))) 
+	(sxml->xml sxml_final p) (newline p)
+(close-output-port p))
+(newline)
+
+
+
+;what about if they don't have it here? alternatives: write a new script with guile 1 script. ask for guile dir as an arg to current script
+; or call guile -- to get (command-line) or something?
