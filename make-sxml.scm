@@ -35,6 +35,24 @@ For instance,
 			,@(append-map 
 				(lambda (prop) `((,(car prop) ,(music-debug (cdr prop)))))
 				(remove (lambda (prop) (eqv? (car prop) 'origin)) (ly:music-mutable-properties obj)))))
+		(;; moment
+			(ly:moment? obj)
+			`(@ (main-numerator ,(ly:moment-main-numerator obj))
+									(main-denominator ,(ly:moment-main-denominator obj))
+									(grace-numerator ,(ly:moment-grace-numerator obj))
+									(grace-denominator ,(ly:moment-grace-denominator obj))))
+		(;; note duration
+			(ly:duration? obj)
+			`(@ 
+				(log ,(ly:duration-log obj))
+				(dot-count ,(ly:duration-dot-count obj))
+				(scale ,(ly:duration-scale obj))))
+		(;; note pitch
+			(ly:pitch? obj)
+			`(@  
+				(octave ,(ly:pitch-octave obj))
+				(note-name ,(ly:pitch-notename obj))
+			 	(alteration ,(ly:pitch-alteration obj))))
 		(;; scheme procedure
 			(procedure? obj)
 			(or (procedure-name obj) obj))
