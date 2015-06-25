@@ -1,4 +1,4 @@
-(define obj '(make-music
+(define obj (make-music
   'SequentialMusic
   'elements
   (list (make-music
@@ -8,7 +8,7 @@
           'pitch
           (ly:make-pitch -1 0 0)))))
 
-(define obj2 '(make-music
+(define obj2 (make-music
   'SequentialMusic
   'elements
   (list (make-music
