@@ -27,20 +27,50 @@ For instance,
       markup-expression
       `(markup ,@(inner-markup->make-markup markup-expression))))
 
-(define (music->sxml obj) 
-	(cond 
+(define (music-debug obj)
+	(cond
 		(;; music expression
 			(ly:music? obj)
 			`(music (@ (name ,(ly:music-property obj 'name)))
 			,@(append-map 
-				(lambda (prop) `(,(car prop) ,(music->sxml (cdr prop))))
+				(lambda (prop) `((,(car prop) ,(music-debug (cdr prop)))))
+				(remove (lambda (prop) (eqv? (car prop) 'origin)) (ly:music-mutable-properties obj)))))
+		(;; scheme procedure
+			(procedure? obj)
+			(or (procedure-name obj) obj))
+		(;; a symbol (avoid having an unquoted symbol)
+		 (symbol? obj)
+		 `,obj)
+		(;; an empty list (avoid having an unquoted empty list)
+		 (null? obj)
+		 `'())
+		(;; a proper list
+		 (list? obj)
+		 `(list ,@(map music-debug obj)))
+		(;; a pair
+		 (pair? obj)
+		 `(cons ,(music-debug (car obj))
+						,(music-debug (cdr obj))))
+		(else 
+			obj)))
+
+(define (music->sxml obj) 
+	(cond 
+		(;; markup expression
+			(markup? obj)
+			(markup-expression->make-markup obj))
+		(;; music expression
+			(ly:music? obj)
+			`(music (@ (name ,(ly:music-property obj 'name)))
+			,@(append-map 
+				(lambda (prop) `(',(car prop) ,(music->sxml (cdr prop))))
 				(remove (lambda (prop) (eqv? (car prop) 'origin)) (ly:music-mutable-properties obj)))))
 		(;; moment
 			(ly:moment? obj)
-			`((@ (main-numerator ,(ly:moment-main-numerator obj))
+			`(@ (main-numerator ,(ly:moment-main-numerator obj))
 									(main-denominator ,(ly:moment-main-denominator obj))
 									(grace-numerator ,(ly:moment-grace-numerator obj))
-									(grace-denominator ,(ly:moment-grace-denominator obj)))))
+									(grace-denominator ,(ly:moment-grace-denominator obj))))
 		(;; note duration
 			(ly:duration? obj)
 			`(@ 
