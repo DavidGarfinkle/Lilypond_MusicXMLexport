@@ -1,4 +1,5 @@
 (load "make-sxml.scm")
+(load "lilysamples.scm")
 (define sxml->xml 
 	(lambda (obj) 
 		(let 
