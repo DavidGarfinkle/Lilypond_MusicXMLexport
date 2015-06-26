@@ -5,5 +5,5 @@
 		(let 
 			((port (open-output-file "sxml_final.scm"))
 				(sxml (music->sxml obj)))
-			(write sxml port)
+			(write `(define sxml ',sxml ) port)
 			(close-output-port port)))) 
