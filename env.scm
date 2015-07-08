@@ -1,9 +1,13 @@
+(use-modules (ice-9 popen))
+
 (load "make-sxml.scm")
 (load "lilysamples.scm")
-(define sxml->xml 
+(define music->xml
 	(lambda (obj) 
 		(let 
 			((port (open-output-file "sxml_final.scm"))
 				(sxml (music->sxml obj)))
 			(write `(define sxml ',sxml ) port)
-			(close-output-port port)))) 
+			(close-output-port port)
+			(let ((port (open-input-pipe "./sxml_to_xml.guile sxml_final.scm"))) (close-pipe port)))))
+
