@@ -67,7 +67,7 @@ For instance,
 		 `'())
 		(;; a proper list
 		 (list? obj)
-		 `(list ,@(map music->sxml obj)))
+		 `(,@(map music->sxml obj)))
 		(;; a pair
 		 (pair? obj)
 		 `(cons ,(music->sxml (car obj))
