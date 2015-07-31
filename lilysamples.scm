@@ -163,3 +163,108 @@
 					(octave -1)
 					(note-name 0)
 					(alteration 0)))))))
+
+
+;suspend these objects otherwise displayMusic will verbose everytime you load "env.scm"
+(define lily-obj 
+	(lambda () (
+		#{\void \displayMusic {
+			\relative e' {
+			\clef "treble" \key c \major \time 4/4 \partial 4. e4 e8 | % 1
+			f4 g4 \bar ""
+			a4 b4 | % 2
+			c4 d4 r4 \bar "|."
+    	}
+		}#}
+))) 
+
+;hello world taken from musicxml website, converted with musicxml2ly and then \displayMusic
+;\relative c' {
+;    \clef "treble" \key c \major \numericTimeSignature\time 4/4 c1 }
+(define obj-hw
+	(make-music
+		'SequentialMusic
+		'elements
+		(list (make-music
+						'RelativeOctaveMusic
+						'element
+						(make-music
+							'SequentialMusic
+							'elements
+							(list (make-music
+											'ContextSpeccedMusic
+											'context-type
+											'Staff
+											'element
+											(make-music
+												'SequentialMusic
+												'elements
+												(list (make-music
+																'PropertySet
+																'value
+																"clefs.G"
+																'symbol
+																'clefGlyph)
+															(make-music
+																'PropertySet
+																'value
+																-6
+																'symbol
+																'middleCClefPosition)
+															(make-music
+																'PropertySet
+																'value
+																-2
+																'symbol
+																'clefPosition)
+															(make-music
+																'PropertySet
+																'value
+																0
+																'symbol
+																'clefTransposition)
+															(make-music
+																'ApplyContext
+																'procedure
+																ly:set-middle-C!))))
+										(make-music
+											'KeyChangeEvent
+											'pitch-alist
+											(list (cons 0 0)
+														(cons 1 0)
+														(cons 2 0)
+														(cons 3 0)
+														(cons 4 0)
+														(cons 5 0)
+														(cons 6 0))
+											'tonic
+											(ly:make-pitch -1 0 0))
+										(make-music
+											'ContextSpeccedMusic
+											'context-type
+											'Staff
+											'element
+											(make-music
+												'OverrideProperty
+												'pop-first
+												#t
+												'grob-property-path
+												(list (quote style))
+												'grob-value
+												'numbered
+												'symbol
+												'TimeSignature))
+										(make-music
+											'TimeSignatureMusic
+											'beat-structure
+											'()
+											'denominator
+											4
+											'numerator
+											4)
+										(make-music
+											'NoteEvent
+											'duration
+											(ly:make-duration 0 0 1)
+											'pitch
+											(ly:make-pitch 0 0 0))))))))

@@ -27,6 +27,16 @@ For instance,
       markup-expression
       `(markup ,@(inner-markup->make-markup markup-expression))))
 
+
+(define (unnest lst) (cond ((null? lst) '()) ((not (list? lst)) (list lst)) (else (append (unnest (car lst)) (unnest (cdr lst))))))
+
+(define (remove-redundant-list lst)
+	(letrec ((loop (lambda (l cont) 
+		(if (list? (car l))
+			(loop (cdr l) (append (car l) (cont))) 
+			lst))))
+		(loop lst '())))
+
 (define (music->sxml obj)
 	(cond
 		(;; markup expression
@@ -67,7 +77,10 @@ For instance,
 		 `'())
 		(;; a proper list
 		 (list? obj)
-		 `(,@(map music->sxml obj)))
+			(let ((cont `(,@(map music->sxml obj))))
+				(if (and (= 1 (length cont)) (list? (car cont))) ;check if there are redundant lists
+					(car cont) ;remove redundant lists - example: (elements (list (music (@ (name SequentialMusic)) (element ...)))) -- (music ) is nested within a redundant list
+					cont)))
 		(;; a pair
 		 (pair? obj)
 		 `(cons ,(music->sxml (car obj))
