@@ -1,32 +1,11 @@
-(define (markup-expression->make-markup markup-expression)
-  "Transform `markup-expression' into an equivalent, hopefuly readable, scheme expression.
-For instance,
-  \\markup \\bold \\italic hello
-==>
-  (markup #:line (#:bold (#:italic (#:simple \"hello\"))))"
-  (define (proc->command-keyword proc)
-    "Return a keyword, eg. `#:bold', from the `proc' function, eg. #<procedure bold-markup (layout props arg)>"
-    (let ((cmd-markup (symbol->string (procedure-name proc))))
-      (symbol->keyword (string->symbol (substring cmd-markup 0 (- (string-length cmd-markup)
-                                                                  (string-length "-markup")))))))
-  (define (transform-arg arg)
-    (cond ((and (pair? arg) (markup? (car arg))) ;; a markup list
-           (append-map inner-markup->make-markup arg))
-          ((and (not (string? arg)) (markup? arg)) ;; a markup
-           (inner-markup->make-markup arg))
-          (else                                  ;; scheme arg
-           (music->make-music arg))))
-  (define (inner-markup->make-markup mrkup)
-    (if (string? mrkup)
-        `(#:simple ,mrkup)
-        (let ((cmd (proc->command-keyword (car mrkup)))
-              (args (map transform-arg (cdr mrkup))))
-          `(,cmd ,@args))))
-  ;; body:
-  (if (string? markup-expression)
-      markup-expression
-      `(markup ,@(inner-markup->make-markup markup-expression))))
 
+
+(define (append-fix lst1 lst2)
+	(letrec ((append-help (lambda (chain tail cont)
+		(if (null? (cdr chain))
+			(cont)
+			(append-help (cdr chain) tail (cons (car chain) (cont tail))))))
+		(append-help lst1 lst2 (lambda x (cons '() x)))))); get rid of (style) and '() append errors. write the function yourself..? ugh.. useless time spent.. 	
 
 (define (unnest lst) (cond ((null? lst) '()) ((not (list? lst)) (list lst)) (else (append (unnest (car lst)) (unnest (cdr lst))))))
 
@@ -44,7 +23,7 @@ For instance,
 			(markup-expression->make-markup obj))
 		(;; music expression
 			(ly:music? obj)
-			`(music (@ (name ,(ly:music-property obj 'name)))
+			`(music (@ (name ,(ly:music-property obj 'name)) (measure ,(time_marks obj)))
 			,@(append-map 
 				(lambda (prop) `((,(car prop) ,(music->sxml (cdr prop)))))
 				(remove (lambda (prop) (eqv? (car prop) 'origin)) (ly:music-mutable-properties obj)))))
@@ -77,16 +56,62 @@ For instance,
 		 `'())
 		(;; a proper list
 		 (list? obj)
-			(let ((cont `(,@(map music->sxml obj))))
-				(if (and (= 1 (length cont)) (list? (car cont))) ;check if there are redundant lists
-					(car cont) ;remove redundant lists - example: (elements (list (music (@ (name SequentialMusic)) (element ...)))) -- (music ) is nested within a redundant list
-					cont)))
+			(let (
+				(cont `(,@(map music->sxml obj)))
+				(list-of-lists? (lambda (lst) (fold (lambda (x y) (and x y)) #t (map list? lst)))))
+				(cond 
+					( ; a single element list ex. '(style)
+						; returns 'style
+						(null? (cdr cont)) 
+						(car cont))
+					  ; a list with a list of lists ex. (elements ((music ...) (music ...) ...))
+						; returns a list of lists ex. (elements (music ...) (music ...) ...)
+					(else 
+						cont))))
 		(;; a pair
 		 (pair? obj)
 		 `(cons ,(music->sxml (car obj))
 						,(music->sxml (cdr obj))))
 		(else 
 			obj)))
+
+
+(define (flatten x)
+(display x) (newline) (newline)
+  (cond ((null? x) '())
+        ((pair? x) (car x))
+        (else (list x))))
+
+					;(if (null? (car cont)) '() (car flatten cont))
+
+(define (markup-expression->make-markup markup-expression)
+  "Transform `markup-expression' into an equivalent, hopefuly readable, scheme expression.
+For instance,
+  \\markup \\bold \\italic hello
+==>
+  (markup #:line (#:bold (#:italic (#:simple \"hello\"))))"
+  (define (proc->command-keyword proc)
+    "Return a keyword, eg. `#:bold', from the `proc' function, eg. #<procedure bold-markup (layout props arg)>"
+    (let ((cmd-markup (symbol->string (procedure-name proc))))
+      (symbol->keyword (string->symbol (substring cmd-markup 0 (- (string-length cmd-markup)
+                                                                  (string-length "-markup")))))))
+  (define (transform-arg arg)
+    (cond ((and (pair? arg) (markup? (car arg))) ;; a markup list
+           (append-map inner-markup->make-markup arg))
+          ((and (not (string? arg)) (markup? arg)) ;; a markup
+           (inner-markup->make-markup arg))
+          (else                                  ;; scheme arg
+           (music->make-music arg))))
+  (define (inner-markup->make-markup mrkup)
+    (if (string? mrkup)
+        `(#:simple ,mrkup)
+        (let ((cmd (proc->command-keyword (car mrkup)))
+              (args (map transform-arg (cdr mrkup))))
+          `(,cmd ,@args))))
+  ;; body:
+  (if (string? markup-expression)
+      markup-expression
+      `(markup ,@(inner-markup->make-markup markup-expression))))
 
 (define-public (music->make-music obj)
   "Generate an expression that, once evaluated, may return an object
