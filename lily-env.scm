@@ -1,9 +1,11 @@
 (use-modules (ice-9 popen))
-
+(load "lily-time.scm")
 (load "make-sxml.scm")
 (load "lilysamples.scm")
+
 (define music->xml
 	(lambda (obj) 
+		(run-translator obj)
 		(let 
 			((port (open-output-file "sxml_final.scm"))
 				(sxml (music->sxml obj)))
