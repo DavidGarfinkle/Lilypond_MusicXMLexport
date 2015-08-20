@@ -33,48 +33,25 @@
 
 (define (measure-list-extend list-of-measures measure-number music-sxml) 
 	(define extend 
-		(letrec* (
-			(new-measure `((measure (@ (number ,(number->string measure-number))))))
-			(new-measure-list 
-				(lambda (mlist) 
-					(cond 
-						( ; null list
-							(null? mlist)
-							new-measure)
-						( ; keep going
-							(< (measure-get-number (car mlist)) measure-number)
-							(display "less than")
-							(cons (car mlist) (new-measure-list (cdr mlist))))
-						(else ; insert measure here
-							(list new-measure mlist))))
-				))
-(display (new-measure-list (vector->list (measure-list mlist)))) (newline)
-			(delay (begin (display (pair? new-measure-list)) (set-measure-list! list-of-measures (list->vector (new-measure-list (vector->list (measure-list mlist)))))))))
-			
-							
-;(current-extended (append (vector->list (measure-list list-of-measures)) `((measure (@ (number ,(number->string measure-number))))))))
-;			(delay (set-measure-list! list-of-measures (list->vector current-extended)))))
+		(let ((current-extended (append (vector->list (measure-list list-of-measures)) `((measure (@ (number ,(number->string measure-number))))))))
+			(delay (set-measure-list! list-of-measures (list->vector current-extended)))))
 	(define update
 		(delay (vector-set! 
 			(measure-list list-of-measures) 
-			(measure-get-index list-of-measures measure-number) 
-			(append (vector-ref (measure-list list-of-measures) (measure-get-index list-of-measures measure-number)) (list music-sxml)))))
+			(measure-index list-of-measures measure-number) 
+			(append (vector-ref (measure-list list-of-measures) (measure-index list-of-measures measure-number)) (list music-sxml)))))
 	(if (measure-exists? list-of-measures measure-number)
 		(force update)
-		(begin (display "yes") (force extend) (display "update") (force update))))
+		(begin (force extend) (force update))))
 
-(define (measure-get-number m)
-(display m)
-	(sxml-match m [(measure (@ (number ,num)) . ,rest) (string->number num)]))
 (define (list-of-measures->list-of-measure-numbers list-of-measures)
-	(display (vector->list (measure-list list-of-measures))) (newline)
-		(map measure-get-number (vector->list (measure-list list-of-measures))))
+	(let ((get-measure-number (lambda (m) (sxml-match m [(measure (@ (number ,num)) . ,rest) (string->number num)]))))
+		(map get-measure-number (vector->list (measure-list list-of-measures)))))
 
 (define (measure-exists? list-of-measures measure-number)
-	(display "measure-exists called") (newline)
 	(fold (lambda (x y) (or x y)) #f (map (lambda (m) (= m measure-number)) (list-of-measures->list-of-measure-numbers list-of-measures))))
 
-(define (measure-get-index list-of-measures measure-number)
+(define (measure-index list-of-measures measure-number)
 	(define (index-of-elt elt lst) (- (length lst) (length (memv elt lst))))
 	(if (measure-exists? list-of-measures measure-number)
 		(index-of-elt measure-number (list-of-measures->list-of-measure-numbers list-of-measures))
@@ -155,3 +132,4 @@
 			acc
 			(sum arg (- power 1) (+ acc (expt arg power))))))
 
+		
