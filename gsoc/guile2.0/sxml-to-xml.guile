@@ -1,0 +1,27 @@
+#! /usr/local/bin/guile -s 
+!#
+(use-modules (sxml simple))
+(load "../guile-env.scm")
+
+(define (string-last str)
+  (string-ref str (- (string-length str) 1)))
+
+(load (cadr (command-line)))
+(let* (
+	(music-sxml (music-sxml-partwise sxml))
+	(musicxml-port (open-output-file "MusicXML.xml")))
+	(call-with-input-file "samples/MusicXML-template.xml" (lambda (p)
+    (let f ((x (read p)))
+			(display x) (newline)
+      (if (eof-object? x)
+          '()
+          (begin 
+						(write x musicxml-port)
+						(write-char #\space musicxml-port)
+						(f (read p)))))))
+	(newline musicxml-port)
+	(sxml->xml music-sxml musicxml-port)
+(close-output-port musicxml-port))
+
+(newline)
+
