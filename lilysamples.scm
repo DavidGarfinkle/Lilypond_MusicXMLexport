@@ -268,3 +268,199 @@
 											(ly:make-duration 0 0 1)
 											'pitch
 											(ly:make-pitch 0 0 0))))))))
+
+(define articulation (make-music
+  'SequentialMusic
+  'elements
+  (list (make-music
+          'RelativeOctaveMusic
+          'element
+          (make-music
+            'SequentialMusic
+            'elements
+            (list (make-music
+                    'NoteEvent
+                    'articulations
+                    (list (make-music
+                            'ArticulationEvent
+                            'articulation-type
+                            "marcato"))
+                    'duration
+                    (ly:make-duration 2 0 1)
+                    'pitch
+                    (ly:make-pitch 1 0 0))
+                  (make-music
+                    'NoteEvent
+                    'articulations
+                    (list (make-music
+                            'ArticulationEvent
+                            'articulation-type
+                            "stopped"))
+                    'pitch
+                    (ly:make-pitch 1 0 0)
+                    'duration
+                    (ly:make-duration 2 0 1))
+                  (make-music
+                    'NoteEvent
+                    'articulations
+                    (list (make-music
+                            'ArticulationEvent
+                            'articulation-type
+                            "tenuto"))
+                    'pitch
+                    (ly:make-pitch 1 0 0)
+                    'duration
+                    (ly:make-duration 2 0 1))
+                  (make-music
+                    'NoteEvent
+                    'articulations
+                    (list (make-music
+                            'ArticulationEvent
+                            'articulation-type
+                            "staccatissimo"))
+                    'pitch
+                    (ly:make-pitch 1 0 0)
+                    'duration
+                    (ly:make-duration 2 0 1))
+                  (make-music
+                    'NoteEvent
+                    'articulations
+                    (list (make-music
+                            'ArticulationEvent
+                            'articulation-type
+                            "accent"))
+                    'duration
+                    (ly:make-duration 2 0 1)
+                    'pitch
+                    (ly:make-pitch 1 0 0))
+                  (make-music
+                    'NoteEvent
+                    'articulations
+                    (list (make-music
+                            'ArticulationEvent
+                            'articulation-type
+                            "staccato"))
+                    'pitch
+                    (ly:make-pitch 1 0 0)
+                    'duration
+                    (ly:make-duration 2 0 1))
+                  (make-music
+                    'NoteEvent
+                    'articulations
+                    (list (make-music
+                            'ArticulationEvent
+                            'articulation-type
+                            "portato"))
+                    'duration
+                    (ly:make-duration 1 0 1)
+                    'pitch
+                    (ly:make-pitch 1 0 0))))))))
+
+(define chords (make-music
+  'SequentialMusic
+  'elements
+  (list (make-music
+          'EventChord
+          'elements
+          (list (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 0 0 1)
+                  'pitch
+                  (ly:make-pitch -1 5 0))
+                (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 0 0 1)
+                  'pitch
+                  (ly:make-pitch -1 0 0))
+                (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 0 0 1)
+                  'pitch
+                  (ly:make-pitch -1 2 0))))
+        (make-music
+          'EventChord
+          'elements
+          (list (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 1 0 1)
+                  'pitch
+                  (ly:make-pitch -1 5 0))
+                (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 1 0 1)
+                  'pitch
+                  (ly:make-pitch -1 0 0))
+                (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 1 0 1)
+                  'pitch
+                  (ly:make-pitch -1 2 0))))
+        (make-music
+          'EventChord
+          'elements
+          (list (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 2 0 1)
+                  'pitch
+                  (ly:make-pitch -1 3 0))
+                (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 2 0 1)
+                  'pitch
+                  (ly:make-pitch -1 5 0))
+                (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 2 0 1)
+                  'pitch
+                  (ly:make-pitch -1 0 0))
+                (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 2 0 1)
+                  'pitch
+                  (ly:make-pitch -1 2 0))))
+        (make-music
+          'EventChord
+          'elements
+          (list (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 3 1 1)
+                  'pitch
+                  (ly:make-pitch -1 5 0))
+                (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 3 1 1)
+                  'pitch
+                  (ly:make-pitch -1 0 0))))
+        (make-music
+          'EventChord
+          'elements
+          (list (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 4 0 1)
+                  'pitch
+                  (ly:make-pitch -1 4 0))
+                (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 4 0 1)
+                  'pitch
+                  (ly:make-pitch -1 0 0))
+                (make-music
+                  'NoteEvent
+                  'duration
+                  (ly:make-duration 4 0 1)
+                  'pitch
+                  (ly:make-pitch -1 2 0)))))))
