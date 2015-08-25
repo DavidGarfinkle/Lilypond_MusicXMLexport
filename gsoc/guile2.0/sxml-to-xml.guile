@@ -1,42 +1,18 @@
 #! /usr/local/bin/guile -s 
 !#
 (use-modules (sxml simple))
-(load "../guile-env.scm")
-
-(define (string-last str)
-  (string-ref str (- (string-length str) 1)))
+(use-modules (ice-9 regex))
+(load "../guile-env.scm") ; loading directory is relative to file
 
 (load (cadr (command-line)))
 (display sxml)
 (let* (
-	(music-sxml (music-sxml-partwise sxml))
-	(musicxml-port (open-output-file "musicxml.xml"))
-	(musicxml-header ; the header of a musicXML file
-"
-<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
-<!DOCTYPE score-partwise PUBLIC
-	\"-//Recordare//DTD MusicXML 3.0 Partwise//EN\"
-	\"http://www.musicxml.org/dtds/partwise.dtd\">
-")) ; end of header
+		(music-sxml (music-sxml-partwise sxml))
+		(musicxml-port (open-output-file "musicxml.xml")) ; write dir is rel. to cur dir
+		(musicxml-header ; the header of a musicXML file
+	"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><!DOCTYPE score-partwise PUBLIC \"-//Recordare//DTD MusicXML 3.0 Partwise//EN\" \"http://www.musicxml.org/dtds/partwise.dtd\">")) ; end of header
 	(write musicxml-header musicxml-port)
 	(sxml->xml music-sxml musicxml-port)
-(close-output-port musicxml-port))
+	(close-output-port musicxml-port))
 
 (newline)
-
-#!
-	(call-with-input-file "samples/MusicXML-template.xml" (lambda (p)
-    (let f ((x (read p)))
-			(display x) (newline)
-      (if (eof-object? x)
-          '()
-          (begin 
-						(write x musicxml-port)
-						(f (read p)))))))
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE score-partwise PUBLIC
-    "-//Recordare//DTD MusicXML 3.0 Partwise//EN"
-    "http://www.musicxml.org/dtds/partwise.dtd">
-
-						(write-char #\space musicxml-port)
-!#
