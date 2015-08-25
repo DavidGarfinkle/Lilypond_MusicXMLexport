@@ -27,7 +27,7 @@
 ;;;
 (define (lily-sxml->music-sxml sxml-list mlist)
 	(define (search x) 
-			; (display x) (newline) (newline)
+			 (display x) (newline) (newline)
 			(sxml-match x
 				[,obj (guard (or 
 					(symbol? obj)
@@ -53,6 +53,7 @@
 							(note-event-write rest measure-number))
 						( ; PropertySet --- modifies the records without printing sxml
 							(eqv? attribute 'PropertySet)
+(display "matched here")
 							(property-set rest measure-number))
 						( ; Time Signatures --- modifies the record AND writes directly to mlist
 							(eqv? attribute 'TimeSignatureMusic) 
@@ -61,7 +62,7 @@
 							(map search rest)))]
 				[(element . ,rest) (map search rest)]
 				[(elements . ,rest) (map search rest)]
-				[,otherwise 'notmached]))
+				[,otherwise otherwise]))
 
 
 ;;;;;;;;;; The following functions expect an SXML list "sblock" and a measure-number.
@@ -148,6 +149,7 @@
 			(sxml (append '(note) (map matcher sblock))))
 		sxml))
 
+; if measure-number is false when it should be set (note events, etc..) then program will crash in sxml-matching of (measure-list-extend)
 	(define (note-event-write sblock measure-number)
 		 (measure-list-extend mlist measure-number (note-event-sxml sblock) 'root))
 

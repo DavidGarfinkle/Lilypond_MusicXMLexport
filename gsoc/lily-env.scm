@@ -5,10 +5,12 @@
 
 (define music->xml
 	(lambda (obj) 
-		(run-translator obj)
+		(run-translator obj) (newline)
 		(let 
-			((port (open-output-file "sxml_transfer.scm"))
+			((port (open-output-file "guile2.0/sxml-transfer.scm"))
 				(sxml (music->sxml obj)))
 			(write `(define sxml ',sxml ) port)
 			(close-output-port port)
-			(let ((port (open-input-pipe "guile2.0/sxml-to-xml.guile sxml_transfer.scm"))) (close-pipe port)))))
+			(let ((port (open-input-pipe "guile2.0/sxml-to-xml.guile sxml-transfer.scm"))) (close-pipe port))
+)))
+

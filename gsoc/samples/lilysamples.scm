@@ -16,29 +16,6 @@
 	}
 #}))	
 
-(define obj3 (delay #{\displayMusic
-	{
-		e2 \grace { f16 } e2 
-	}
-#}))
-
-(define obj4 (delay #{\displayMusic
-	{
-		<< { d1^\trill_( } { s2 s4. \grace { c16 d } } >> c1)
-	}
-#}))
-
-; 46d-PickupMeasure-ImplicitMeasures.ly taken from musicxml test suite
-(define 46d (delay #{\displayMusic
-	{
-		\relative e' {
-				\clef "treble" \key c \major \time 4/4 \partial 4. e4 e8 | % 1
-				f4 g4 \bar ""
-				a4 b4 | % 2
-				c4 d4 r4 \bar "|." }
-	}
-#}))
-
 ;hello world taken from musicxml website, converted with musicxml2ly 
 (define hw (delay #{\displayMusic
 	{
@@ -56,7 +33,6 @@
 	}
 #}))
 
-
 ; a chords example taken from lilypond.org
 (define chords (delay #{\displayMusic
 	{
@@ -67,3 +43,41 @@
 		< g c e >16
 	}
 #}))
+
+;;;; MUSIC-XML EXAMPLES TAKEN FROM TEST SUITE
+(define 21b (delay #{\displayMusic
+	{
+    \clef "treble" \numericTimeSignature\time 4/4 <a f>4 <a f>4 <a f>4
+    <a f>4 | % 2
+    <a f>4 <a f>4 <a f>4 <a f>4
+	}
+#}))
+
+
+
+;; not supported yet
+(define obj3 (delay #{\displayMusic
+	{
+		e2 \grace { f16 } e2 
+	}
+#}))
+
+;; not supported yet
+(define obj4 (delay #{\displayMusic
+	{
+		<< { d1^\trill_( } { s2 s4. \grace { c16 d } } >> c1)
+	}
+#}))
+
+;; not supported yet
+; 46d-PickupMeasure-ImplicitMeasures.ly taken from musicxml test suite
+(define 46d (delay #{\displayMusic
+	{
+		\relative e' {
+				\clef "treble" \key c \major \time 4/4 \partial 4. e4 e8 | % 1
+				f4 g4 \bar ""
+				a4 b4 | % 2
+				c4 d4 r4 \bar "|." }
+	}
+#}))
+

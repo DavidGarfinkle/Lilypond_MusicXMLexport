@@ -82,27 +82,3 @@
 		(index-of-elt measure-number (list-of-measures->list-of-measure-numbers list-of-measures))
 		#f))
 
-
-;; TODO: insert measures according to increasing order
-#!
-		(letrec* (
-			(new-measure `((measure (@ (number ,(number->string measure-number))))))
-			(mlist (vector->list (measure-list list-of-measures)))
-			(new-measure-list (lambda (mlist) 
-				(cond 
-					( ; null list
-						(null? mlist)
-						new-measure)
-					( ; if we've reached the end of the list
-						(null? (cdr mlist))
-						(append mlist new-measure))
-					(else
-						(if (< (measure-get-number (car mlist)) measure-number)
-							(begin 
-(display "begin") 
-(display (car mlist)) (newline) 
-(display (cdr mlist)) 
-							(append  (car mlist) (new-measure-list `(,(cdr mlist)))))
-							(append new-measure mlist)))))))
-			(delay (set-measure-list! list-of-measures (list->vector (new-measure-list mlist))))))
-!#	

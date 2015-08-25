@@ -7,9 +7,24 @@
   (string-ref str (- (string-length str) 1)))
 
 (load (cadr (command-line)))
+(display sxml)
 (let* (
 	(music-sxml (music-sxml-partwise sxml))
-	(musicxml-port (open-output-file "MusicXML.xml")))
+	(musicxml-port (open-output-file "musicxml.xml"))
+	(musicxml-header ; the header of a musicXML file
+"
+<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
+<!DOCTYPE score-partwise PUBLIC
+	\"-//Recordare//DTD MusicXML 3.0 Partwise//EN\"
+	\"http://www.musicxml.org/dtds/partwise.dtd\">
+")) ; end of header
+	(write musicxml-header musicxml-port)
+	(sxml->xml music-sxml musicxml-port)
+(close-output-port musicxml-port))
+
+(newline)
+
+#!
 	(call-with-input-file "samples/MusicXML-template.xml" (lambda (p)
     (let f ((x (read p)))
 			(display x) (newline)
@@ -17,11 +32,11 @@
           '()
           (begin 
 						(write x musicxml-port)
-						(write-char #\space musicxml-port)
 						(f (read p)))))))
-	(newline musicxml-port)
-	(sxml->xml music-sxml musicxml-port)
-(close-output-port musicxml-port))
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE score-partwise PUBLIC
+    "-//Recordare//DTD MusicXML 3.0 Partwise//EN"
+    "http://www.musicxml.org/dtds/partwise.dtd">
 
-(newline)
-
+						(write-char #\space musicxml-port)
+!#
