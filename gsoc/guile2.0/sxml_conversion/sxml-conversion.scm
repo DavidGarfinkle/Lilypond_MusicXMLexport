@@ -13,6 +13,8 @@
 (define m1 (make-measure-list #()))
 
 (define (music-sxml-partwise lily-sxml)
+	; reset the measure record
+	(define m1 (make-measure-list #()))
 	`(score-partwise (@ (version "3.0"))
 		(part-list
 			(score-part (@ (id "P1"))
@@ -27,7 +29,7 @@
 ;;;
 (define (lily-sxml->music-sxml sxml-list mlist)
 	(define (search x) 
-			 (display x) (newline) (newline)
+			;(display x) (newline) (newline)
 			(sxml-match x
 				[,obj (guard (or 
 					(symbol? obj)
@@ -53,7 +55,6 @@
 							(note-event-write rest measure-number))
 						( ; PropertySet --- modifies the records without printing sxml
 							(eqv? attribute 'PropertySet)
-(display "matched here")
 							(property-set rest measure-number))
 						( ; Time Signatures --- modifies the record AND writes directly to mlist
 							(eqv? attribute 'TimeSignatureMusic) 
@@ -72,18 +73,24 @@
 ;;; KeyChangeEvent (key signatures)
 ; does not support key signatures with mixed sharps and flats. minor/major only.
 	(define (key-change-event sblock measure-number)
+		(define (key-change-event-helper oct note alt lst)
+			(let* (
+				; Isolate and sum the cdr of each pair in the pitch-alist 
+				(fifths (fold (lambda (scale-deg sum) (+ sum (* 2 (caddr scale-deg)))) 0 lst))
+				(sxml 
+					`(key
+						(fifths ,fifths))))
+				(measure-list-extend mlist measure-number sxml 'attributes)))
 		(sxml-match sblock
 			[(list 
-				(tonic (@ (octave ,oct) (note-name ,note) (alteration ,alt)))
-				(pitch-alist ,lst))
-				(let* (
-					; Isolate and sum the cdr of each pair in the pitch-alist 
-					(fifths (fold (lambda (scale-deg sum) (+ sum (* 2 (caddr scale-deg)))) 0 lst))
-					(sxml 
-						`(key
-							(fifths ,fifths))))
-					(measure-list-extend mlist measure-number sxml 'attributes))]))
-
+					(tonic (@ (octave ,oct) (note-name ,note) (alteration ,alt)))
+					(pitch-alist ,lst))
+				(key-change-event-helper oct note alt lst)]	
+			[(list 
+					(pitch-alist ,lst)
+					(tonic (@ (octave ,oct) (note-name ,note) (alteration ,alt))))
+				(key-change-event-helper oct note alt lst)]))
+				
 ;;; ApplyContext (so far just prints musicXML clefs)
 ;; Expects a lily procedure name as its first element
 	(define (apply-context sblock measure-number) 
@@ -102,32 +109,41 @@
 			
 ;;; PropertySet does not write to the measure list. It just updates the clef record
 	(define (property-set sblock measure-number) 
+		(define (property-set-helper symbol val)
+			(cond
+				( ; clefGlyph
+					(equal? symbol 'clefGlyph) 
+					(set-clef-glyph! current-clef val))
+				( ; clefPosition
+					(equal? symbol 'clefPosition)
+					(set-clef-position! current-clef val))
+				( ; clefTransposition
+					(equal? symbol 'clefTransposition)
+					(set-clef-transposition! current-clef val))
+				(else	'PropertySetNotSupported)))
 		(sxml-match sblock
+			[(list (value ,val) (symbol ,symbol))
+				(property-set-helper symbol val)]
 			[(list (symbol ,symbol) (value ,val))
-				(cond
-					( ; clefGlyph
-						(equal? symbol 'clefGlyph) 
-						(set-clef-glyph! current-clef val))
-					( ; clefPosition
-						(equal? symbol 'clefPosition)
-						(set-clef-position! current-clef val))
-					( ; clefTransposition
-						(equal? symbol 'clefTransposition)
-						(set-clef-transposition! current-clef val))
-					(else	'PropertySetNotSupported))]))
+				(property-set-helper symbol val)]))
 
 ;;; TimeSignatureMusic records the current timesig and also writes it to mlist
 	(define (time-signature-music sblock measure-number) 
+		(define (time-signature-music-helper num denom beat-structure)
+			(set-timesig-numerator! current-timesig num)
+			(set-timesig-denominator! current-timesig denom)
+			(set-timesig-beat-structure! current-timesig beat-structure)
+			(let ((sxml 
+				`(time
+					(beats ,num)
+					(beat-type ,denom))))
+			(measure-list-extend mlist measure-number sxml 'attributes)))
 		(sxml-match sblock
 			[(list (numerator ,num) (denominator ,denom) (beat-structure ,beat-structure))
-				(set-timesig-numerator! current-timesig num)
-				(set-timesig-denominator! current-timesig denom)
-				(set-timesig-beat-structure! current-timesig beat-structure)
-				(let ((sxml 
-					`(time
-						(beats ,num)
-						(beat-type ,denom))))
-				(measure-list-extend mlist measure-number sxml 'attributes))]))
+				(time-signature-music-helper num denom beat-structure)]
+			[(list (beat-structure ,beat-structure) (denominator ,denom) (numerator ,num))
+				(time-signature-music-helper num denom beat-structure)]))
+
 
 ;;; NoteEvent
 ;; Returns the musicSXML equivalent of a lilypond SXML NoteEvent

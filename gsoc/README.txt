@@ -5,7 +5,7 @@ HOWTO:
 Run lilypond scheme-sandbox
 Load lily-env.scm from gsoc/ directory
 Call (music->xml mus) from gsoc/ directory on a music expression mus
-Currently limited to single-voice SequentialMusic of notes, chords, articulations, key signatures, time signatures, and clefs
+Currently limited to single-voice SequentialMusic contexts of notes, chords, articulations (not all are supported, such as early-music or instrument-specific examples), key signatures, time signatures, and clefs
 
 INCLUDED EXAMPLES:
 samples/lilysamples.scm has lazy examples of music expressions. 
@@ -20,9 +20,9 @@ Result will be stored in musicxml.xml
 
 WHAT'S GOING ON UNDER THE HOOD
 1. (run-translator) 			; lily/lily-time.scm ; pre-procecesses music expression mus, inserting measure information as a guile object 
-2. (music->sxml)					; lily/make-sxml.scm ; transforms music expression mus to its SXML equivalent. It's modelled after music->make-music in lily function \displayMusic
-3. The resulting lily-SXML is written to a sxml_transfer.scm to be transfered into a guile2.0 script
-4. (music-sxml-partwise)  ; guile2.0/sxml_conversion/sxml-conversion.scm ; takes lily-sxml and returns its music-SXML equivalent 
+2. (music->sxml)					; lily/make-sxml.scm ; transforms music expression mus into its SXML equivalent. It's modelled after music->make-music in lily function \displayMusic
+3. The output from (music->sxml) is written to sxml-transfer.scm so it can be transfered into a guile2.0 script
+4. (lily-sxml->music-sxml)  ; guile2.0/sxml_conversion/sxml-conversion.scm ; takes the lily-sxml written in sxml-transfer.scm and translates it to a music-SXML representation
 5. (sxml->xml)						; uses (sxml simple) guile module to convert the music-SXML to an XML equivalent
 
 
@@ -41,8 +41,9 @@ lily-env.scm: (music->xml))
 --somehow pass the scheme object from the lily script to the guile2.0 script without having to write a new file?
 
 guile2.0/sxml-to-xml.guile
---remove the backslash in \" , and remove \n and \t when printing the XML header
+--remove the backslash in \" , and remove \n and \t when printing the XML header, also remove the wrapping quotes in the XML header. 
 
 guile2.0/sxml_conversion/sxml-conversion.scm: lily-sxml->music-sxml
 --that whole measure thing is a huge mess. i'd rather have a record of vectors, where each measure is a vector so that we have easy access to <attributes> and <note>. Currently it's really not scalable; as we continue to explore MusicXML's hierarchy we'll need to access any child node of <measure> (ex. attributes, note, etc), and doing this with lists and sxml-match will be a mess
 --insert measures according to increasing order (so as to keep the list/vector sorted)
+--edit the matching functions so that they match list permutations (not sure if this is possible) or at least find an alternative to listing each list permutation as a new match. ex: [(list (val ,val) (symbol ,symbol)) (action-expression)] but also requires [(list (symbol ,symbol) (val ,val)) (action-expression)] since the music expressions aren't consistent one way or another
