@@ -1,9 +1,10 @@
+;;; A HelloWorld example of MusicXML taken from their website
+
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE score-partwise PUBLIC
     "-//Recordare//DTD MusicXML 3.0 Partwise//EN"
     "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="3.0">
-}}
   <part-list>
     <score-part id="P1">
       <part-name>Music</part-name>
@@ -37,6 +38,7 @@
   </part>
 </score-partwise>
 
+;;; The same xml but fed though guile's (xml->sxml). This is what SXML-conversion should make our examples look like
 
 (score-partwise (@ (version "3.0"))
   (part-list  (score-part (@ (id "P1"))

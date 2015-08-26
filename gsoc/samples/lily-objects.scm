@@ -1,466 +1,83 @@
-(define obj (make-music
-  'SequentialMusic
-  'elements
-  (list (make-music
-          'NoteEvent
-          'duration
-          (ly:make-duration 2 0 1)
-          'pitch
-          (ly:make-pitch -1 0 0)))))
+;;; All of these samples are the result of feeding music expressions into \displayMusic{ } 
+;; to use them, define a new var as (force obj) in lilyond scheme-sandbox
+;; ex. (define foo (force obj)) 
+;; (run-translator foo) -- adds measure information to foo
+;; (music->sxml foo) -- returns sxml of foo
 
-(define obj2 (make-music
-  'SequentialMusic
-  'elements
-  (list (make-music
-          'NoteEvent
-          'duration
-          (ly:make-duration 2 0 1)
-          'pitch
-          (ly:make-pitch -1 0 0))
-        (make-music
-          'NoteEvent
-          'pitch
-          (ly:make-pitch -1 1 0)
-          'duration
-          (ly:make-duration 2 0 1)))))
+(define obj (delay #{\displayMusic
+	{
+		c
+	}
+ #}))
 
-(define obj3 (make-music
-  'SequentialMusic
-  'elements
-  (list (make-music
-          'NoteEvent
-          'duration
-          (ly:make-duration 1 0 1)
-          'pitch
-          (ly:make-pitch -1 2 0))
-        (make-music
-          'GraceMusic
-          'element
-          (make-music
-            'SequentialMusic
-            'elements
-            (list (make-music
-                    'SequentialMusic
-                    'elements
-                    '())
-                  (make-music
-                    'SequentialMusic
-                    'elements
-                    (list (make-music
-                            'NoteEvent
-                            'duration
-                            (ly:make-duration 4 0 1)
-                            'pitch
-                            (ly:make-pitch -1 3 0))))
-                  (make-music
-                    'SequentialMusic
-                    'elements
-                    '()))))
-        (make-music
-          'NoteEvent
-          'duration
-          (ly:make-duration 1 0 1)
-          'pitch
-          (ly:make-pitch -1 2 0)))))
+(define obj2 (delay #{\displayMusic
+	{
+		c d
+	}
+#}))	
 
-#! 
-  <<
-    { d1^\trill_( }
-    { s2 s4. \grace { c16 d } }
-  >>
-  c1)
-!#
-(define obj4 
-(make-music
-  'SequentialMusic
-  'elements
-  (list (make-music
-          'SimultaneousMusic
-          'elements
-          (list (make-music
-                  'SequentialMusic
-                  'elements
-                  (list (make-music
-                          'NoteEvent
-                          'articulations
-                          (list (make-music
-                                  'ArticulationEvent
-                                  'direction
-                                  1
-                                  'articulation-type
-                                  "trill")
-                                (make-music
-                                  'SlurEvent
-                                  'direction
-                                  -1
-                                  'span-direction
-                                  -1))
-                          'duration
-                          (ly:make-duration 0 0 1)
-                          'pitch
-                          (ly:make-pitch -1 1 0))))
-                (make-music
-                  'SequentialMusic
-                  'elements
-                  (list (make-music
-                          'SkipEvent
-                          'duration
-                          (ly:make-duration 1 0 1))
-                        (make-music
-                          'SkipEvent
-                          'duration
-                          (ly:make-duration 2 1 1))
-                        (make-music
-                          'GraceMusic
-                          'element
-                          (make-music
-                            'SequentialMusic
-                            'elements
-                            (list (make-music
-                                    'SequentialMusic
-                                    'elements
-                                    '())
-                                  (make-music
-                                    'SequentialMusic
-                                    'elements
-                                    (list (make-music
-                                            'NoteEvent
-                                            'duration
-                                            (ly:make-duration 4 0 1)
-                                            'pitch
-                                            (ly:make-pitch -1 0 0))
-                                          (make-music
-                                            'NoteEvent
-                                            'pitch
-                                            (ly:make-pitch -1 1 0)
-                                            'duration
-                                            (ly:make-duration 4 0 1))))
-                                  (make-music
-                                    'SequentialMusic
-                                    'elements
-                                    '()))))))))
-        (make-music
-          'NoteEvent
-          'articulations
-          (list (make-music
-                  'SlurEvent
-                  'span-direction
-                  1))
-          'duration
-          (ly:make-duration 0 0 1)
-          'pitch
-          (ly:make-pitch -1 0 0)))))
+;hello world taken from musicxml website, converted with musicxml2ly 
+(define hw (delay #{\displayMusic
+	{
+		\relative c' {
+			\clef "treble" \key c \major \numericTimeSignature\time 4/4 c1 }
+	}
+#}))
 
-(define sxml-obj1
-	'(music (@ (name SequentialMusic))
-		(elements
-			(music (@ (name NoteEvent))
-				(duration (@
-					(log 2)
-					(dot-count 0)
-					(scale 1)))
-				(pitch (@
-					(octave -1)
-					(note-name 0)
-					(alteration 0)))))))
+; articulations example taken from <http://www.lilypond.org/doc/v2.19/Documentation/learning/articulation-and-dynamics>
+(define articulations (delay #{\displayMusic
+	{
+		\relative {
+			c''4-^ c-+ c-- c-!
+			c4-> c-. c2-_ }
+	}
+#}))
+
+; a chords example taken from lilypond.org
+(define chords (delay #{\displayMusic
+	{
+		< a c e >1
+		< a c e >2
+		< f a c e >4
+		< a c >8.
+		< g c e >16
+	}
+#}))
+
+;;;; MUSIC-XML EXAMPLES TAKEN FROM TEST SUITE
+(define 21b (delay #{\displayMusic
+	{
+    \clef "treble" \numericTimeSignature\time 4/4 <a f>4 <a f>4 <a f>4
+    <a f>4 | % 2
+    <a f>4 <a f>4 <a f>4 <a f>4
+	}
+#}))
 
 
-;suspend these objects otherwise displayMusic will verbose everytime you load "env.scm"
-(define lily-obj 
-	(lambda () (
-		#{\void \displayMusic {
-			\relative e' {
-			\clef "treble" \key c \major \time 4/4 \partial 4. e4 e8 | % 1
-			f4 g4 \bar ""
-			a4 b4 | % 2
-			c4 d4 r4 \bar "|."
-    	}
-		}#}
-))) 
 
-;hello world taken from musicxml website, converted with musicxml2ly and then \displayMusic
-;\relative c' {
-;    \clef "treble" \key c \major \numericTimeSignature\time 4/4 c1 }
-(define obj-hw
-	(make-music
-		'SequentialMusic
-		'elements
-		(list (make-music
-						'RelativeOctaveMusic
-						'element
-						(make-music
-							'SequentialMusic
-							'elements
-							(list (make-music
-											'ContextSpeccedMusic
-											'context-type
-											'Staff
-											'element
-											(make-music
-												'SequentialMusic
-												'elements
-												(list (make-music
-																'PropertySet
-																'value
-																"clefs.G"
-																'symbol
-																'clefGlyph)
-															(make-music
-																'PropertySet
-																'value
-																-6
-																'symbol
-																'middleCClefPosition)
-															(make-music
-																'PropertySet
-																'value
-																-2
-																'symbol
-																'clefPosition)
-															(make-music
-																'PropertySet
-																'value
-																0
-																'symbol
-																'clefTransposition)
-															(make-music
-																'ApplyContext
-																'procedure
-																ly:set-middle-C!))))
-										(make-music
-											'KeyChangeEvent
-											'pitch-alist
-											(list (cons 0 0)
-														(cons 1 0)
-														(cons 2 0)
-														(cons 3 0)
-														(cons 4 0)
-														(cons 5 0)
-														(cons 6 0))
-											'tonic
-											(ly:make-pitch -1 0 0))
-										(make-music
-											'ContextSpeccedMusic
-											'context-type
-											'Staff
-											'element
-											(make-music
-												'OverrideProperty
-												'pop-first
-												#t
-												'grob-property-path
-												(list (quote style))
-												'grob-value
-												'numbered
-												'symbol
-												'TimeSignature))
-										(make-music
-											'TimeSignatureMusic
-											'beat-structure
-											'()
-											'denominator
-											4
-											'numerator
-											4)
-										(make-music
-											'NoteEvent
-											'duration
-											(ly:make-duration 0 0 1)
-											'pitch
-											(ly:make-pitch 0 0 0))))))))
+;; not supported yet
+(define obj3 (delay #{\displayMusic
+	{
+		e2 \grace { f16 } e2 
+	}
+#}))
 
-(define articulation (make-music
-  'SequentialMusic
-  'elements
-  (list (make-music
-          'RelativeOctaveMusic
-          'element
-          (make-music
-            'SequentialMusic
-            'elements
-            (list (make-music
-                    'NoteEvent
-                    'articulations
-                    (list (make-music
-                            'ArticulationEvent
-                            'articulation-type
-                            "marcato"))
-                    'duration
-                    (ly:make-duration 2 0 1)
-                    'pitch
-                    (ly:make-pitch 1 0 0))
-                  (make-music
-                    'NoteEvent
-                    'articulations
-                    (list (make-music
-                            'ArticulationEvent
-                            'articulation-type
-                            "stopped"))
-                    'pitch
-                    (ly:make-pitch 1 0 0)
-                    'duration
-                    (ly:make-duration 2 0 1))
-                  (make-music
-                    'NoteEvent
-                    'articulations
-                    (list (make-music
-                            'ArticulationEvent
-                            'articulation-type
-                            "tenuto"))
-                    'pitch
-                    (ly:make-pitch 1 0 0)
-                    'duration
-                    (ly:make-duration 2 0 1))
-                  (make-music
-                    'NoteEvent
-                    'articulations
-                    (list (make-music
-                            'ArticulationEvent
-                            'articulation-type
-                            "staccatissimo"))
-                    'pitch
-                    (ly:make-pitch 1 0 0)
-                    'duration
-                    (ly:make-duration 2 0 1))
-                  (make-music
-                    'NoteEvent
-                    'articulations
-                    (list (make-music
-                            'ArticulationEvent
-                            'articulation-type
-                            "accent"))
-                    'duration
-                    (ly:make-duration 2 0 1)
-                    'pitch
-                    (ly:make-pitch 1 0 0))
-                  (make-music
-                    'NoteEvent
-                    'articulations
-                    (list (make-music
-                            'ArticulationEvent
-                            'articulation-type
-                            "staccato"))
-                    'pitch
-                    (ly:make-pitch 1 0 0)
-                    'duration
-                    (ly:make-duration 2 0 1))
-                  (make-music
-                    'NoteEvent
-                    'articulations
-                    (list (make-music
-                            'ArticulationEvent
-                            'articulation-type
-                            "portato"))
-                    'duration
-                    (ly:make-duration 1 0 1)
-                    'pitch
-                    (ly:make-pitch 1 0 0))))))))
+;; not supported yet
+(define obj4 (delay #{\displayMusic
+	{
+		<< { d1^\trill_( } { s2 s4. \grace { c16 d } } >> c1)
+	}
+#}))
 
-(define chords (make-music
-  'SequentialMusic
-  'elements
-  (list (make-music
-          'EventChord
-          'elements
-          (list (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 0 0 1)
-                  'pitch
-                  (ly:make-pitch -1 5 0))
-                (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 0 0 1)
-                  'pitch
-                  (ly:make-pitch -1 0 0))
-                (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 0 0 1)
-                  'pitch
-                  (ly:make-pitch -1 2 0))))
-        (make-music
-          'EventChord
-          'elements
-          (list (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 1 0 1)
-                  'pitch
-                  (ly:make-pitch -1 5 0))
-                (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 1 0 1)
-                  'pitch
-                  (ly:make-pitch -1 0 0))
-                (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 1 0 1)
-                  'pitch
-                  (ly:make-pitch -1 2 0))))
-        (make-music
-          'EventChord
-          'elements
-          (list (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 2 0 1)
-                  'pitch
-                  (ly:make-pitch -1 3 0))
-                (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 2 0 1)
-                  'pitch
-                  (ly:make-pitch -1 5 0))
-                (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 2 0 1)
-                  'pitch
-                  (ly:make-pitch -1 0 0))
-                (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 2 0 1)
-                  'pitch
-                  (ly:make-pitch -1 2 0))))
-        (make-music
-          'EventChord
-          'elements
-          (list (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 3 1 1)
-                  'pitch
-                  (ly:make-pitch -1 5 0))
-                (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 3 1 1)
-                  'pitch
-                  (ly:make-pitch -1 0 0))))
-        (make-music
-          'EventChord
-          'elements
-          (list (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 4 0 1)
-                  'pitch
-                  (ly:make-pitch -1 4 0))
-                (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 4 0 1)
-                  'pitch
-                  (ly:make-pitch -1 0 0))
-                (make-music
-                  'NoteEvent
-                  'duration
-                  (ly:make-duration 4 0 1)
-                  'pitch
-                  (ly:make-pitch -1 2 0)))))))
+;; not supported yet
+; 46d-PickupMeasure-ImplicitMeasures.ly taken from musicxml test suite
+(define 46d (delay #{\displayMusic
+	{
+		\relative e' {
+				\clef "treble" \key c \major \time 4/4 \partial 4. e4 e8 | % 1
+				f4 g4 \bar ""
+				a4 b4 | % 2
+				c4 d4 r4 \bar "|." }
+	}
+#}))
+

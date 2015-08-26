@@ -1,11 +1,21 @@
 #! /usr/local/bin/guile -s 
 !#
 (use-modules (sxml simple))
+(use-modules (ice-9 regex))
+(load "../guile-env.scm") ; loading directory is relative to file
 
 (load (cadr (command-line)))
-(let ((p (open-output-file "xml_final.xml"))) 
-	(sxml->xml sxml p) (newline p)
-(close-output-port p))
+(let* (
+		(music-sxml (music-sxml-partwise sxml))
+		(musicxml-port (open-output-file "musicxml.xml")) ; write dir is rel. to cur dir
+		(musicxml-header ; the header of a musicXML file
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
+<!DOCTYPE score-partwise PUBLIC
+	\"-//Recordare//DTD MusicXML 3.0 Partwise//EN\"
+	\"http://www.musicxml.org/dtds/partwise.dtd\">
+")) ; end of header
+	(display musicxml-header musicxml-port)
+	(sxml->xml music-sxml musicxml-port)
+	(close-output-port musicxml-port))
+
 (newline)
-
-

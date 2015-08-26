@@ -1,26 +1,17 @@
 (use-modules (ice-9 popen))
-(load "lily-time.scm")
-(load "make-sxml.scm")
-(load "lilysamples.scm")
+(load "lily/lily-time.scm") 
+(load "lily/make-sxml.scm")
+(load "samples/lily-objects.scm")
 
 (define music->xml
 	(lambda (obj) 
-		(run-translator obj)
+		(run-translator obj) (newline)
 		(let 
-			((port (open-output-file "sxml_final.scm"))
+			((port (open-output-file "guile2.0/sxml-transfer.scm"))
 				(sxml (music->sxml obj)))
-			(write `(define sxml ',sxml ) port)
+			(write `(define sxml ',sxml) port)
 			(close-output-port port)
-			(let ((port (open-input-pipe "./sxml-to-xml.guile sxml_final.scm"))) (close-pipe port)))))
-#!
-;; my attempt at changing this to a function rather than two nested lets
-(define output-file "sxml_final.scm")
-(define f-music->xml
-	((lambda (sxml port pipe obj)
-		(write `(define sxml ',sxml ) port)
-		(close-output-port port)
-		(pipe ()))
-	((music->sxml obj)
-	 (open-output-file output-file) 	
-	 (lambda (sus) (open-input-pipe ("./sxml_to_xml.guile"))))))	
-!#
+			(let ((port (open-output-pipe "guile2.0/sxml-to-xml.guile sxml-transfer.scm"))) (close-pipe port))
+			(display "Conversion Successful!") (newline)
+)))
+
