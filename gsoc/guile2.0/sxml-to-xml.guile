@@ -10,9 +10,7 @@
 		(musicxml-port (open-output-file "musicxml.xml")) ; write dir is rel. to cur dir
 		(musicxml-header ; the header of a musicXML file
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
-<!DOCTYPE score-partwise PUBLIC
-	\"-//Recordare//DTD MusicXML 3.0 Partwise//EN\"
-	\"http://www.musicxml.org/dtds/partwise.dtd\">
+<!DOCTYPE score-partwise PUBLIC \"-//Recordare//DTD MusicXML 3.0 Partwise//EN\" \"http://www.musicxml.org/dtds/partwise.dtd\">
 ")) ; end of header
 	(display musicxml-header musicxml-port)
 	(sxml->xml music-sxml musicxml-port)
