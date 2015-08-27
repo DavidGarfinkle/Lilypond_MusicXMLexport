@@ -7,7 +7,10 @@
 	(cond
 		(;; music expression
 			(ly:music? obj)
-			`(music (@ (name ,(ly:music-property obj 'name)) (measure ,(time_marks obj)))
+			;; ATTRIBUTES
+			`(music (@ (name ,(ly:music-property obj 'name)) ; extract property name
+			,@(if (time_marks obj) `((measure ,(car (time_marks obj))) (moment ,(music->sxml (cdr (time_marks obj))))) `((time ,#f)))) ; measure number & position
+			;; recurse on nested elements 
 			,@(append-map 
 				(lambda (prop) `((,(car prop) ,(music->sxml (cdr prop)))))
 				(remove (lambda (prop) (eqv? (car prop) 'origin)) (ly:music-mutable-properties obj)))))

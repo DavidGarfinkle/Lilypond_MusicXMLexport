@@ -7,9 +7,9 @@
 		(if (ly:music? m)
 		 (let ((c (ly:translator-context engraver)))
 		  (set! (time_marks m)
-		   (ly:context-property c 'internalBarNumber)))))))))
-
-;(ly:context-property c 'measurePosition)
+		   (cons
+				(ly:context-property c 'internalBarNumber)
+				(ly:context-property c 'measurePosition))))))))))
 
 (define (run-translator obj) (ly:run-translator obj
   #{
