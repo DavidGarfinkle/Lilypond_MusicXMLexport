@@ -2,8 +2,8 @@
 ;; RECORDS
 ;;
 
-;;; Measures record
-;; Measures are stored as a vector of lists; each list is one measure, each record is a part. One vector per record.
+;;; Measures record to implement a dynamic list
+;; Measures are stored as a vector of vectors; each measure is one vector; each record is a musicxml part. One measure-list per record.
 (define-record-type <measure-list>
  (make-measure-list list-of-measures)
 	measure-list?

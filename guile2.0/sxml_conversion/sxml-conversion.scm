@@ -21,8 +21,11 @@
 				(part-name Music)))
 		(part (@ (id "P1"))
 		,@(lily-sxml->music-sxml lily-sxml m1))))
+
+(define (custom-error message obj)
+	(newline)	(display `(failed ,message)) (newline) (display obj) (newline) (newline))
 		
-;;;;; TEST recursive
+;;;;; lily-sxml->music-sxml recursive
 ;;; args: sxml-list ; record mlist
 ;;; output: .. some garbage
 ;;; side effects: populates mlist with lists of measures
@@ -34,9 +37,7 @@
 				[,obj (guard (or 
 					(symbol? obj)
 					(null? obj))) obj]
-				[(list (music (@ (name ,attribute) (measure (,measure-number #f))) . ,rest) ...)
-					`(,(search `(music (@ (name ,attribute) (measure ,measure-number)) ,@rest)) ...)]
-				[(music (@ (name ,attribute) (measure (,measure-number #f))) . ,rest) 
+				[(music (@ (name ,attribute) (measure (,measure-number #f)) (moment (,moment-list #f))) . ,rest) 
 					(cond 
 						( ; ArticulationEvent --- returns sxml
 							(eqv? attribute 'ArticulationEvent)
@@ -66,30 +67,22 @@
 				[,otherwise otherwise]))
 
 
-;;;;;;;;;; The following functions expect an SXML list "sblock" and a measure-number.
+;;;;;;;;;; The following functions expect a lily-SXML block and time information
 ;; They convert sblock to Music-SXML and write it to the corresponding measure list
 ;; ** except for clefs, which are read and written separately
 
 ;;; KeyChangeEvent (key signatures)
 ; does not support key signatures with mixed sharps and flats. minor/major only.
 	(define (key-change-event sblock measure-number)
-		(define (key-change-event-helper oct note alt lst)
-			(let* (
-				; Isolate and sum the cdr of each pair in the pitch-alist 
-				(fifths (fold (lambda (scale-deg sum) (+ sum (* 2 (caddr scale-deg)))) 0 lst))
-				(sxml 
-					`(key
-						(fifths ,fifths))))
-				(measure-list-extend mlist measure-number sxml 'attributes)))
 		(sxml-match sblock
 			[(list 
-					(tonic (@ (octave ,oct) (note-name ,note) (alteration ,alt)))
-					(pitch-alist ,lst))
-				(key-change-event-helper oct note alt lst)]	
-			[(list 
-					(pitch-alist ,lst)
-					(tonic (@ (octave ,oct) (note-name ,note) (alteration ,alt))))
-				(key-change-event-helper oct note alt lst)]))
+				(pitch-alist . ,lst)
+				(tonic (@ (octave ,oct) (note-name ,note) (alteration ,alt))))
+				(let ((sxml 		
+					`(key
+						(fifths ,(lily-pitch-alist->musicxml-fifths lst)))))
+				(measure-list-extend mlist measure-number sxml 'attributes))]
+			[,otherwise (custom-error 'KeyChangeEvent sblock)]))
 				
 ;;; ApplyContext (so far just prints musicXML clefs)
 ;; Expects a lily procedure name as its first element
@@ -109,45 +102,28 @@
 			
 ;;; PropertySet does not write to the measure list. It just updates the clef record
 	(define (property-set sblock measure-number) 
-		(define (property-set-helper symbol val)
-			(cond
-				( ; clefGlyph
-					(equal? symbol 'clefGlyph) 
-					(set-clef-glyph! current-clef val))
-				( ; clefPosition
-					(equal? symbol 'clefPosition)
-					(set-clef-position! current-clef val))
-				( ; clefTransposition
-					(equal? symbol 'clefTransposition)
-					(set-clef-transposition! current-clef val))
-				(else	'PropertySetNotSupported)))
 		(sxml-match sblock
-			[(list (value ,val) (symbol ,symbol))
-				(property-set-helper symbol val)]
 			[(list (symbol ,symbol) (value ,val))
-				(property-set-helper symbol val)]))
+				(match symbol
+					['clefGlyph (set-clef-glyph! current-clef val)]
+					['clefPosition (set-clef-position! current-clef val)]
+					['clefTransposition (set-clef-transposition! current-clef val)]
+					[otherwise (custom-error 'PropertySetNotSuppoted sblock)])]))
 
-;;; TimeSignatureMusic records the current timesig and also writes it to mlist
+;;; TimeSignatureMusic writes to mlist
 	(define (time-signature-music sblock measure-number) 
-		(define (time-signature-music-helper num denom beat-structure)
-			(set-timesig-numerator! current-timesig num)
-			(set-timesig-denominator! current-timesig denom)
-			(set-timesig-beat-structure! current-timesig beat-structure)
-			(let ((sxml 
-				`(time
-					(beats ,num)
-					(beat-type ,denom))))
-			(measure-list-extend mlist measure-number sxml 'attributes)))
 		(sxml-match sblock
-			[(list (numerator ,num) (denominator ,denom) (beat-structure ,beat-structure))
-				(time-signature-music-helper num denom beat-structure)]
 			[(list (beat-structure ,beat-structure) (denominator ,denom) (numerator ,num))
-				(time-signature-music-helper num denom beat-structure)]))
-
+				(let ((sxml 
+					`(time
+						(beats ,num)
+						(beat-type ,denom))))
+				(measure-list-extend mlist measure-number sxml 'attributes))]))
 
 ;;; NoteEvent
 ;; Returns the musicSXML equivalent of a lilypond SXML NoteEvent
 ;; todo add <dot/> for each dot value
+;; todo refactor so it just adds note to a measure, then adds pitch, duration, type, to the note node of a measure
 ;; todo return (duration ...) and (type ...) s.t. they are not nested in a list
 	(define (note-event-sxml sblock)
 		(let* (

@@ -44,6 +44,11 @@
 		[-2 "longa"]))
 
 
+;;; KEY SIGNATURES
+(define (lily-pitch-alist->musicxml-fifths lst)
+	(fold (lambda (scale-deg sum) (+ sum (* 2 (caddr scale-deg)))) 0 lst))
+
+
 ;;; CLEFS
 (define (lily-clef-glyph->musicxml-clef-sign clef) 
 	(match clef

@@ -12,8 +12,12 @@
 			,@(if (time_marks obj) `((measure ,(car (time_marks obj))) (moment ,(music->sxml (cdr (time_marks obj))))) `((time ,#f)))) ; measure number & position
 			;; recurse on nested elements 
 			,@(append-map 
-				(lambda (prop) `((,(car prop) ,(music->sxml (cdr prop)))))
-				(remove (lambda (prop) (eqv? (car prop) 'origin)) (ly:music-mutable-properties obj)))))
+				(lambda (prop)
+					(let ((rest (music->sxml (cdr prop))))
+					(if (and (list? rest) (every list? rest))
+						`((,(car prop) ,@rest))
+						`((,(car prop) ,rest)))))	
+				(remove (lambda (prop) (eqv? (car prop) 'origin)) (sort-list (ly:music-mutable-properties obj) alist<?)))))
 		(;; moment
 			(ly:moment? obj)
 			`(@ (main-numerator ,(ly:moment-main-numerator obj))
@@ -36,13 +40,15 @@
 			(procedure? obj)
 			(or (procedure-name obj) obj))
 		(;; a symbol (avoid having an unquoted symbol)
-		 (symbol? obj)
-		 `,obj)
+			(symbol? obj)
+			`,obj)
 		(;; an empty list (avoid having an unquoted empty list)
-		 (null? obj)
+			(null? obj)
 		 `'())
 		(;; a proper list
-		 (list? obj)
+			(list? obj)
+			(map music->sxml obj))
+#!
 			(let (
 				(cont `(,@(map music->sxml obj)))
 				(list-of-lists? (lambda (lst) (fold (lambda (x y) (and x y)) #t (map list? lst)))))
@@ -55,6 +61,7 @@
 						; returns a list of lists ex. (elements (music ...) (music ...) ...)
 					(else 
 						cont))))
+!#
 		(;; a pair
 		 (pair? obj)
 		 `(cons ,(music->sxml (car obj))
