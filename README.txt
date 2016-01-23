@@ -28,6 +28,13 @@ WHAT'S GOING ON UNDER THE HOOD
 
 TODO LIST
 
+guile2.0/sxml_conversion/data-types.scm: 
+--the way measures are stored is a huge mess. i should make it explicit tree structures or a-lists
+--insert measures according to increasing order, so as to keep the list of measures sorted
+
+guile2.0/sxml_conversion/sxml-conversion.scm: lily-sxml->music-sxml
+--edit the matching functions so that they match list permutations (not sure if this is possible) or at least find an alternative to listing each list permutation as a new match. ex: [(list (val ,val) (symbol ,symbol)) (action-expression)] but also requires [(list (symbol ,symbol) (val ,val)) (action-expression)] since the music expressions aren't consistent one way or another
+
 lily/make-sxml.scm: (make-sxml.scm)
 --Remove the unncessary list containers, then edit sxml-conversion.scm so it doesn't have to match lists of lists 
 --format the output so it's indented and looks pretty for better testing
@@ -42,8 +49,3 @@ lily-env.scm: (music->xml))
 
 guile2.0/sxml-to-xml.guile
 --remove the backslash in \" , and remove \n and \t when printing the XML header, also remove the wrapping quotes in the XML header. 
-
-guile2.0/sxml_conversion/sxml-conversion.scm: lily-sxml->music-sxml
---that whole measure thing is a huge mess. i'd rather have a record of vectors, where each measure is a vector so that we have easy access to <attributes> and <note>. Currently it's really not scalable; as we continue to explore MusicXML's hierarchy we'll need to access any child node of <measure> (ex. attributes, note, etc), and doing this with lists and sxml-match will be a mess
---insert measures according to increasing order (so as to keep the list/vector sorted)
---edit the matching functions so that they match list permutations (not sure if this is possible) or at least find an alternative to listing each list permutation as a new match. ex: [(list (val ,val) (symbol ,symbol)) (action-expression)] but also requires [(list (symbol ,symbol) (val ,val)) (action-expression)] since the music expressions aren't consistent one way or another
